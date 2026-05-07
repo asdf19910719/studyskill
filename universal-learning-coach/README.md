@@ -160,6 +160,8 @@ universal-learning-coach/
     ├── scan_learning_gaps.py
     ├── create_expanded_note.py
     ├── studyctl.py
+    ├── sync_state.py
+    ├── finish_session.py
     └── test_learning_scripts.py
 ```
 
@@ -212,8 +214,13 @@ python scripts/generate_review_plan.py .
 python scripts/scan_learning_gaps.py ./学习资料.md
 python scripts/create_expanded_note.py "Android vendor 分区"
 python scripts/studyctl.py next .
+python scripts/sync_state.py to-json .
+python scripts/sync_state.py to-md .
+python scripts/finish_session.py . --date 2026-05-07 --summary "完成 vendor 分区学习"
 python scripts/test_learning_scripts.py
 ```
+
+`finish_session.py` 适合在 `$universal-learning-coach 结束` 时由 AI 调用，用于自动追加 `_学习状态.md`、`错题本.md`、`复习卡片.md`，并同步更新 `learning_state.json`。
 
 ## 注意事项
 

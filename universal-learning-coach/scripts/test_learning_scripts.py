@@ -103,6 +103,83 @@ class LearningScriptsTest(unittest.TestCase):
             self.assertIn("下一步动作：开始考试", result.stdout)
             self.assertIn("$universal-learning-coach 学完了", result.stdout)
 
+    def test_sync_state_updates_json_from_markdown(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            (work / "_学习状态.md").write_text(
+                "# 学习状态\n\n## 当前学习主题\nAndroid 音频\n\n## 当前流程状态\n学习中\n\n## 下一步动作\n继续学习\n",
+                encoding="utf-8",
+            )
+
+            result = run_script("sync_state.py", "to-json", work)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            state = json.loads((work / "learning_state.json").read_text(encoding="utf-8"))
+            self.assertEqual(state["current_topic"], "Android 音频")
+            self.assertEqual(state["flow_status"], "学习中")
+            self.assertEqual(state["next_action"], "继续学习")
+
+    def test_sync_state_updates_markdown_from_json(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            (work / "_学习状态.md").write_text(
+                "# 学习状态\n\n## 当前学习主题\n旧主题\n\n## 当前流程状态\n未初始化\n\n## 下一步动作\n初始化\n",
+                encoding="utf-8",
+            )
+            (work / "learning_state.json").write_text(
+                json.dumps(
+                    {
+                        "current_topic": "Android 音频",
+                        "flow_status": "待复习",
+                        "next_action": "生成复习计划",
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            result = run_script("sync_state.py", "to-md", work)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            content = (work / "_学习状态.md").read_text(encoding="utf-8")
+            self.assertIn("Android 音频", content)
+            self.assertIn("待复习", content)
+            self.assertIn("生成复习计划", content)
+
+    def test_finish_session_appends_logs_and_updates_json(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            run_script("init_learning_files.py", work)
+
+            result = run_script(
+                "finish_session.py",
+                work,
+                "--date",
+                "2026-05-07",
+                "--summary",
+                "理解了 vendor 分区的工程边界。",
+                "--learned",
+                "vendor 与 system 的职责边界",
+                "--wrong",
+                "混淆 vendor 和 product 分区",
+                "--flashcard-q",
+                "vendor 分区解决什么问题？",
+                "--flashcard-a",
+                "隔离厂商实现和系统框架，降低系统升级耦合。",
+                "--flow-status",
+                "待复习",
+                "--next-action",
+                "生成复习计划",
+            )
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            state = json.loads((work / "learning_state.json").read_text(encoding="utf-8"))
+            self.assertEqual(state["flow_status"], "待复习")
+            self.assertEqual(state["next_action"], "生成复习计划")
+            self.assertIn("理解了 vendor 分区", (work / "_学习状态.md").read_text(encoding="utf-8"))
+            self.assertIn("混淆 vendor", (work / "错题本.md").read_text(encoding="utf-8"))
+            self.assertIn("vendor 分区解决什么问题", (work / "复习卡片.md").read_text(encoding="utf-8"))
+
     def test_append_learning_log_appends_date_heading_and_input_file(self):
         with tempfile.TemporaryDirectory() as tmp:
             work = Path(tmp)

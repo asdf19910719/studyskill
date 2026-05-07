@@ -75,6 +75,7 @@ When the user says `结束`:
 3. Set `当前流程状态` to `待复习` or `学习中`.
 4. Set `下一步动作` to `生成复习计划` if review is due, otherwise `继续学习`.
 5. Do not overwrite existing Obsidian files without stating the exact sections to change.
+6. If script execution is available and the session data is explicit, use `scripts/finish_session.py <dir>` to append session updates and update `learning_state.json`.
 
 ### `复习`
 
@@ -262,6 +263,9 @@ If script execution is available, run `scripts/generate_review_plan.py <learning
 - `scripts/scan_learning_gaps.py <material.md>` outputs a deterministic first-pass material gap report.
 - `scripts/create_expanded_note.py "<topic>" --output-dir <dir>` creates an expanded-note Markdown template.
 - `scripts/studyctl.py next <dir>` reads `learning_state.json` or `_学习状态.md` and recommends the next short command.
+- `scripts/sync_state.py to-json <dir>` syncs `_学习状态.md` status fields into `learning_state.json`.
+- `scripts/sync_state.py to-md <dir>` syncs `learning_state.json` status fields into `_学习状态.md`.
+- `scripts/finish_session.py <dir> --date YYYY-MM-DD --summary "..."` appends end-of-session updates and updates `learning_state.json`.
 
 ## Prohibited Behavior
 
