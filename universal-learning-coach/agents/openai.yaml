@@ -1,0 +1,4 @@
+interface:
+  display_name: "通用学习教练"
+  short_description: "系统学习、资料诊断与 Obsidian 笔记维护助手"
+  default_prompt: "Use $universal-learning-coach to turn my notes into a 40-minute learning task, quiz me, and update Obsidian learning files."
