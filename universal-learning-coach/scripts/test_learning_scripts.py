@@ -68,6 +68,20 @@ class LearningScriptsTest(unittest.TestCase):
             self.assertEqual(state["flow_status"], "未初始化")
             self.assertEqual(state["next_action"], "初始化")
 
+    def test_init_learning_files_indexes_existing_materials(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            (work / "Android_vendor架构.md").write_text("# Android vendor 架构\nTreble 和 VNDK\n", encoding="utf-8")
+            (work / "错题本.md").write_text("# existing wrong answers\n", encoding="utf-8")
+
+            result = run_script("init_learning_files.py", work)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((work / "学习材料索引.md").exists())
+            state = json.loads((work / "learning_state.json").read_text(encoding="utf-8"))
+            self.assertIn("Android_vendor架构.md", state["materials"])
+            self.assertNotIn("错题本.md", state["materials"])
+
     def test_studyctl_next_prefers_learning_state_json(self):
         with tempfile.TemporaryDirectory() as tmp:
             work = Path(tmp)
@@ -305,6 +319,32 @@ class LearningScriptsTest(unittest.TestCase):
             self.assertIn("VNDK 作用", content)
             self.assertIn("vendor/product 区别", content)
             self.assertIn("## 通过标准", content)
+
+    def test_index_materials_writes_index_and_updates_state(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            (work / "notes").mkdir()
+            (work / "notes" / "Android_vendor架构.md").write_text("# Android vendor 架构\nTreble 和 VNDK\n", encoding="utf-8")
+            (work / "学习材料.txt").write_text("binder 音频链路\n", encoding="utf-8")
+            (work / "今日学习任务.md").write_text("# generated\n", encoding="utf-8")
+            (work / "learning_state.json").write_text(
+                json.dumps({"materials": [], "current_topic": ""}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+
+            result = run_script("index_materials.py", work)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            index_path = work / "学习材料索引.md"
+            self.assertTrue(index_path.exists())
+            index_content = index_path.read_text(encoding="utf-8")
+            self.assertIn("notes/Android_vendor架构.md", index_content)
+            self.assertIn("学习材料.txt", index_content)
+            self.assertNotIn("今日学习任务.md", index_content)
+            state = json.loads((work / "learning_state.json").read_text(encoding="utf-8"))
+            self.assertIn("notes/Android_vendor架构.md", state["materials"])
+            self.assertIn("学习材料.txt", state["materials"])
+            self.assertEqual(state["current_topic"], "Android vendor架构")
 
 
 if __name__ == "__main__":

@@ -2,6 +2,7 @@ import argparse
 import shutil
 from pathlib import Path
 import json
+import index_materials
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -32,6 +33,8 @@ def init_learning_files(target_dir):
             output.write_text(json.dumps(data, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
         results.append("created: " + str(output))
 
+    materials = index_materials.index_materials(target)
+    results.append("indexed materials: " + str(len(materials)))
     return results
 
 

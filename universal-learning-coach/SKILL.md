@@ -39,11 +39,12 @@ When the user says `初始化`:
 
 1. Scan the current directory or user-specified directory for learning materials.
 2. Create missing `learning_state.json`, `_学习状态.md`, `错题本.md`, and `复习卡片.md` using `scripts/init_learning_files.py <dir>` when script execution is available.
-3. Identify the learning topic and classify the material as complete, sparse clues, or mixed.
-4. Run material diagnosis before making the first plan.
-5. If material score is below 7/10, set `当前流程状态` to `需要扩展资料` and `下一步动作` to `扩展笔记`.
-6. If material is sufficient, set `当前流程状态` to `学习中` and `下一步动作` to `继续学习`.
-7. Output the recommended learning route and the first small task.
+3. If script execution is available, use `scripts/index_materials.py <dir>` or the indexing done by `init_learning_files.py` to create `学习材料索引.md` and update `learning_state.json.materials`.
+4. Identify the learning topic and classify the material as complete, sparse clues, or mixed.
+5. Run material diagnosis before making the first plan.
+6. If material score is below 7/10, set `当前流程状态` to `需要扩展资料` and `下一步动作` to `扩展笔记`.
+7. If material is sufficient, set `当前流程状态` to `学习中` and `下一步动作` to `继续学习`.
+8. Output the recommended learning route and the first small task.
 
 ### `继续`
 
@@ -258,6 +259,7 @@ If script execution is available, run `scripts/generate_review_plan.py <learning
 ## Bundled Scripts
 
 - `scripts/init_learning_files.py <dir>` creates `_学习状态.md`, `错题本.md`, and `复习卡片.md` from templates without overwriting.
+- `scripts/index_materials.py <dir>` scans local `.md` and `.txt` learning materials, writes `学习材料索引.md`, and updates `learning_state.json.materials`.
 - `scripts/append_learning_log.py --target <file> --input <file>` appends dated Markdown to a learning file.
 - `scripts/generate_review_plan.py <dir>` reads due dates from `错题本.md` and `复习卡片.md`, then writes `今日复习计划.md`.
 - `scripts/scan_learning_gaps.py <material.md>` outputs a deterministic first-pass material gap report.
