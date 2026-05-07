@@ -29,14 +29,16 @@ Use this sequence unless the user asks for a specific mode:
 
 Support terse commands after the skill is invoked, especially `$universal-learning-coach 初始化`, `$universal-learning-coach 继续`, `$universal-learning-coach 学完了`, `$universal-learning-coach 结束`, and `$universal-learning-coach 复习`. Treat these commands as state-machine actions. Do not require the user to repeat the long prompt each time.
 
-Always start short-command handling by reading `_学习状态.md` when it exists. Use its `当前流程状态` and `下一步动作` fields to decide what to do next. If those fields do not exist, infer status from existing sections and recommend updating the file to the newer template.
+Always start short-command handling by reading `learning_state.json` first, then `_学习状态.md` when JSON is unavailable. Use `flow_status` / `当前流程状态` and `next_action` / `下一步动作` to decide what to do next. If those fields do not exist, infer status from existing sections and recommend updating the file to the newer template. Read `references/状态机规则.md` when handling short commands.
+
+If script execution is available, run `scripts/studyctl.py next <learning-dir>` before deciding what `继续` should do. Treat the script output as a deterministic routing hint, not as a replacement for teaching or grading.
 
 ### `初始化`
 
 When the user says `初始化`:
 
 1. Scan the current directory or user-specified directory for learning materials.
-2. Create missing `_学习状态.md`, `错题本.md`, and `复习卡片.md` using `scripts/init_learning_files.py <dir>` when script execution is available.
+2. Create missing `learning_state.json`, `_学习状态.md`, `错题本.md`, and `复习卡片.md` using `scripts/init_learning_files.py <dir>` when script execution is available.
 3. Identify the learning topic and classify the material as complete, sparse clues, or mixed.
 4. Run material diagnosis before making the first plan.
 5. If material score is below 7/10, set `当前流程状态` to `需要扩展资料` and `下一步动作` to `扩展笔记`.
@@ -47,7 +49,7 @@ When the user says `初始化`:
 
 When the user says `继续`:
 
-1. Read `_学习状态.md`, `错题本.md`, and `复习卡片.md` if they exist.
+1. Read `learning_state.json`, `_学习状态.md`, `错题本.md`, and `复习卡片.md` if they exist.
 2. If due review items exist, prefer a short review block before new learning.
 3. If `下一步动作` is `扩展笔记` or material is too thin, diagnose gaps and either search official sources or output a search plan when browsing is unavailable.
 4. If `下一步动作` is `开始考试`, ask exactly one quiz question and wait.
@@ -219,6 +221,7 @@ Read `references/出题规则.md` for question types and grading constraints.
 
 Prioritize these files in the current learning directory:
 
+- `learning_state.json`
 - `_学习状态.md`
 - `错题本.md`
 - `复习卡片.md`
@@ -258,6 +261,7 @@ If script execution is available, run `scripts/generate_review_plan.py <learning
 - `scripts/generate_review_plan.py <dir>` reads due dates from `错题本.md` and `复习卡片.md`, then writes `今日复习计划.md`.
 - `scripts/scan_learning_gaps.py <material.md>` outputs a deterministic first-pass material gap report.
 - `scripts/create_expanded_note.py "<topic>" --output-dir <dir>` creates an expanded-note Markdown template.
+- `scripts/studyctl.py next <dir>` reads `learning_state.json` or `_学习状态.md` and recommends the next short command.
 
 ## Prohibited Behavior
 

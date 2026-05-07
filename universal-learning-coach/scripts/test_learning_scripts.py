@@ -3,6 +3,7 @@ import sys
 import tempfile
 import unittest
 import os
+import json
 from pathlib import Path
 
 
@@ -53,6 +54,54 @@ class LearningScriptsTest(unittest.TestCase):
             content = (work / "_学习状态.md").read_text(encoding="utf-8")
             self.assertIn("## 当前流程状态", content)
             self.assertIn("## 下一步动作", content)
+
+    def test_init_learning_files_creates_structured_state_json(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+
+            result = run_script("init_learning_files.py", work)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            state_path = work / "learning_state.json"
+            self.assertTrue(state_path.exists())
+            state = json.loads(state_path.read_text(encoding="utf-8"))
+            self.assertEqual(state["flow_status"], "未初始化")
+            self.assertEqual(state["next_action"], "初始化")
+
+    def test_studyctl_next_prefers_learning_state_json(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            (work / "learning_state.json").write_text(
+                json.dumps(
+                    {
+                        "flow_status": "需要扩展资料",
+                        "next_action": "扩展笔记",
+                        "current_topic": "Android vendor 分区",
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            result = run_script("studyctl.py", "next", work)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("下一步动作：扩展笔记", result.stdout)
+            self.assertIn("$universal-learning-coach 继续", result.stdout)
+
+    def test_studyctl_next_falls_back_to_markdown_state(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            (work / "_学习状态.md").write_text(
+                "# 学习状态\n\n## 当前流程状态\n待考试\n\n## 下一步动作\n开始考试\n",
+                encoding="utf-8",
+            )
+
+            result = run_script("studyctl.py", "next", work)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("下一步动作：开始考试", result.stdout)
+            self.assertIn("$universal-learning-coach 学完了", result.stdout)
 
     def test_append_learning_log_appends_date_heading_and_input_file(self):
         with tempfile.TemporaryDirectory() as tmp:

@@ -1,0 +1,27 @@
+{
+  "schema_version": 1,
+  "current_topic": "",
+  "current_stage": "",
+  "current_goal": "",
+  "flow_status": "未初始化",
+  "next_action": "初始化",
+  "last_learning_date": "",
+  "last_action": "",
+  "materials": [],
+  "mastered": [],
+  "unmastered": [],
+  "last_test": {
+    "date": "",
+    "topic": "",
+    "score": null,
+    "issues": []
+  },
+  "review_plan": {
+    "D+1": "",
+    "D+3": "",
+    "D+7": "",
+    "D+14": "",
+    "D+30": ""
+  },
+  "notes": ""
+}
