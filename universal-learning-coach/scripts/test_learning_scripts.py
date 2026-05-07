@@ -180,6 +180,28 @@ class LearningScriptsTest(unittest.TestCase):
             self.assertIn("混淆 vendor", (work / "错题本.md").read_text(encoding="utf-8"))
             self.assertIn("vendor 分区解决什么问题", (work / "复习卡片.md").read_text(encoding="utf-8"))
 
+    def test_doctor_reports_missing_learning_files(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+
+            result = run_script("doctor.py", work)
+
+            self.assertEqual(result.returncode, 1)
+            self.assertIn("缺失文件", result.stdout)
+            self.assertIn("_学习状态.md", result.stdout)
+            self.assertIn("init_learning_files.py", result.stdout)
+
+    def test_doctor_passes_initialized_project(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            run_script("init_learning_files.py", work)
+
+            result = run_script("doctor.py", work)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("健康检查通过", result.stdout)
+            self.assertIn("下一步动作：初始化", result.stdout)
+
     def test_append_learning_log_appends_date_heading_and_input_file(self):
         with tempfile.TemporaryDirectory() as tmp:
             work = Path(tmp)

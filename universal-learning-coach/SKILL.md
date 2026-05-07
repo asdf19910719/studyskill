@@ -266,6 +266,7 @@ If script execution is available, run `scripts/generate_review_plan.py <learning
 - `scripts/sync_state.py to-json <dir>` syncs `_学习状态.md` status fields into `learning_state.json`.
 - `scripts/sync_state.py to-md <dir>` syncs `learning_state.json` status fields into `_学习状态.md`.
 - `scripts/finish_session.py <dir> --date YYYY-MM-DD --summary "..."` appends end-of-session updates and updates `learning_state.json`.
+- `scripts/doctor.py <dir>` checks whether a learning project has required state files, reports due review counts, and recommends the next short command.
 
 ## Prohibited Behavior
 
