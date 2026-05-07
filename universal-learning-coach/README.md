@@ -160,6 +160,7 @@ universal-learning-coach/
     ├── scan_learning_gaps.py
     ├── create_expanded_note.py
     ├── studyctl.py
+    ├── start_lesson.py
     ├── sync_state.py
     ├── finish_session.py
     ├── doctor.py
@@ -168,7 +169,7 @@ universal-learning-coach/
 
 ## v1 / v2 差异
 
-v1 是纯 Skill 指令、模板和规则文件，适合 Codex 与 Claude Code 直接使用。v2 增加 Python 脚本，用于自动创建学习文件、追加学习日志、生成复习计划、扫描资料缺口和创建扩展笔记模板。
+v1 是纯 Skill 指令、模板和规则文件，适合 Codex 与 Claude Code 直接使用。v2 增加 Python 脚本，用于自动创建学习文件、追加学习日志、生成今日学习任务、生成复习计划、扫描资料缺口和创建扩展笔记模板。
 
 ## 自动流程说明
 
@@ -215,6 +216,7 @@ python scripts/generate_review_plan.py .
 python scripts/scan_learning_gaps.py ./学习资料.md
 python scripts/create_expanded_note.py "Android vendor 分区"
 python scripts/studyctl.py next .
+python scripts/start_lesson.py . --minutes 40
 python scripts/sync_state.py to-json .
 python scripts/sync_state.py to-md .
 python scripts/finish_session.py . --date 2026-05-07 --summary "完成 vendor 分区学习"
@@ -223,6 +225,7 @@ python scripts/test_learning_scripts.py
 ```
 
 `finish_session.py` 适合在 `$universal-learning-coach 结束` 时由 AI 调用，用于自动追加 `_学习状态.md`、`错题本.md`、`复习卡片.md`，并同步更新 `learning_state.json`。
+`start_lesson.py` 适合在 `$universal-learning-coach 继续` 路由到普通学习时调用，用于根据 `learning_state.json` 或 `_学习状态.md` 自动生成 `今日学习任务.md`。
 `doctor.py` 适合进入学习项目后先运行，用于检查状态文件是否完整、是否有到期复习、下一步应该调用哪个短命令。
 
 ## 注意事项

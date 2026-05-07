@@ -31,7 +31,7 @@ Support terse commands after the skill is invoked, especially `$universal-learni
 
 Always start short-command handling by reading `learning_state.json` first, then `_学习状态.md` when JSON is unavailable. Use `flow_status` / `当前流程状态` and `next_action` / `下一步动作` to decide what to do next. If those fields do not exist, infer status from existing sections and recommend updating the file to the newer template. Read `references/状态机规则.md` when handling short commands.
 
-If script execution is available, run `scripts/studyctl.py next <learning-dir>` before deciding what `继续` should do. Treat the script output as a deterministic routing hint, not as a replacement for teaching or grading.
+If script execution is available, run `scripts/studyctl.py next <learning-dir>` before deciding what `继续` should do. Treat the script output as a deterministic routing hint, not as a replacement for teaching or grading. When the route is ordinary continued learning, run `scripts/start_lesson.py <learning-dir> --minutes 40` to generate `今日学习任务.md`, then fill in the live teacher-style explanation and questions.
 
 ### `初始化`
 
@@ -53,7 +53,7 @@ When the user says `继续`:
 2. If due review items exist, prefer a short review block before new learning.
 3. If `下一步动作` is `扩展笔记` or material is too thin, diagnose gaps and either search official sources or output a search plan when browsing is unavailable.
 4. If `下一步动作` is `开始考试`, ask exactly one quiz question and wait.
-5. Otherwise, generate one 30-60 minute learning task based on current progress.
+5. Otherwise, run `scripts/start_lesson.py <dir> --minutes 40` when available, read or summarize `今日学习任务.md`, and generate one 30-60 minute learning task based on current progress.
 6. End with a concrete instruction for what should be written back to `_学习状态.md`, including the new `当前流程状态` and `下一步动作`.
 
 ### `学完了` / `开始考我`
@@ -263,6 +263,7 @@ If script execution is available, run `scripts/generate_review_plan.py <learning
 - `scripts/scan_learning_gaps.py <material.md>` outputs a deterministic first-pass material gap report.
 - `scripts/create_expanded_note.py "<topic>" --output-dir <dir>` creates an expanded-note Markdown template.
 - `scripts/studyctl.py next <dir>` reads `learning_state.json` or `_学习状态.md` and recommends the next short command.
+- `scripts/start_lesson.py <dir> --minutes 40` writes `今日学习任务.md` from the current structured learning state.
 - `scripts/sync_state.py to-json <dir>` syncs `_学习状态.md` status fields into `learning_state.json`.
 - `scripts/sync_state.py to-md <dir>` syncs `learning_state.json` status fields into `_学习状态.md`.
 - `scripts/finish_session.py <dir> --date YYYY-MM-DD --summary "..."` appends end-of-session updates and updates `learning_state.json`.

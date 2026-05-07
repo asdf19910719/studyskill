@@ -274,6 +274,38 @@ class LearningScriptsTest(unittest.TestCase):
             self.assertIn("# Android vendor 分区", content)
             self.assertIn("## 十、资料来源", content)
 
+    def test_start_lesson_generates_today_task_from_json_state(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            (work / "learning_state.json").write_text(
+                json.dumps(
+                    {
+                        "current_topic": "Android vendor 分区",
+                        "current_stage": "系统分区基础",
+                        "current_goal": "理解 vendor/system 边界",
+                        "flow_status": "学习中",
+                        "next_action": "继续学习",
+                        "materials": ["Android系统分层_vendor架构_Treble.md"],
+                        "unmastered": ["VNDK 作用", "vendor/product 区别"],
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            result = run_script("start_lesson.py", work, "--minutes", "40", "--date", "2026-05-07")
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            task_path = work / "今日学习任务.md"
+            self.assertTrue(task_path.exists())
+            content = task_path.read_text(encoding="utf-8")
+            self.assertIn("# 今日学习任务", content)
+            self.assertIn("Android vendor 分区", content)
+            self.assertIn("40 分钟", content)
+            self.assertIn("VNDK 作用", content)
+            self.assertIn("vendor/product 区别", content)
+            self.assertIn("## 通过标准", content)
+
 
 if __name__ == "__main__":
     unittest.main()
