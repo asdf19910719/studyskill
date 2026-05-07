@@ -25,6 +25,64 @@ Use this sequence unless the user asks for a specific mode:
 8. Generate one learning task, one explanation, one quiz question, or one Obsidian update according to the user's request.
 9. Preserve source boundaries: user material, official sources, third-party sources, and AI synthesis.
 
+## Short Command Protocol
+
+Support terse commands after the skill is invoked, especially `$universal-learning-coach 初始化`, `$universal-learning-coach 继续`, `$universal-learning-coach 学完了`, `$universal-learning-coach 结束`, and `$universal-learning-coach 复习`. Treat these commands as state-machine actions. Do not require the user to repeat the long prompt each time.
+
+Always start short-command handling by reading `_学习状态.md` when it exists. Use its `当前流程状态` and `下一步动作` fields to decide what to do next. If those fields do not exist, infer status from existing sections and recommend updating the file to the newer template.
+
+### `初始化`
+
+When the user says `初始化`:
+
+1. Scan the current directory or user-specified directory for learning materials.
+2. Create missing `_学习状态.md`, `错题本.md`, and `复习卡片.md` using `scripts/init_learning_files.py <dir>` when script execution is available.
+3. Identify the learning topic and classify the material as complete, sparse clues, or mixed.
+4. Run material diagnosis before making the first plan.
+5. If material score is below 7/10, set `当前流程状态` to `需要扩展资料` and `下一步动作` to `扩展笔记`.
+6. If material is sufficient, set `当前流程状态` to `学习中` and `下一步动作` to `继续学习`.
+7. Output the recommended learning route and the first small task.
+
+### `继续`
+
+When the user says `继续`:
+
+1. Read `_学习状态.md`, `错题本.md`, and `复习卡片.md` if they exist.
+2. If due review items exist, prefer a short review block before new learning.
+3. If `下一步动作` is `扩展笔记` or material is too thin, diagnose gaps and either search official sources or output a search plan when browsing is unavailable.
+4. If `下一步动作` is `开始考试`, ask exactly one quiz question and wait.
+5. Otherwise, generate one 30-60 minute learning task based on current progress.
+6. End with a concrete instruction for what should be written back to `_学习状态.md`, including the new `当前流程状态` and `下一步动作`.
+
+### `学完了` / `开始考我`
+
+When the user says `学完了`, `开始考我`, or equivalent:
+
+1. Switch to quiz mode.
+2. Ask exactly one question.
+3. Do not provide the answer yet.
+4. After the user answers, grade strictly and decide whether to require a retry.
+5. Set the next action to `结束更新` when the quiz is complete.
+
+### `结束`
+
+When the user says `结束`:
+
+1. Summarize what was learned in this session.
+2. Output or write append-only updates for `_学习状态.md`, `错题本.md`, and `复习卡片.md`.
+3. Set `当前流程状态` to `待复习` or `学习中`.
+4. Set `下一步动作` to `生成复习计划` if review is due, otherwise `继续学习`.
+5. Do not overwrite existing Obsidian files without stating the exact sections to change.
+
+### `复习`
+
+When the user says `复习`:
+
+1. Read `_学习状态.md`, `错题本.md`, and `复习卡片.md`.
+2. Generate the due review list using D+1, D+3, D+7, D+14, and D+30.
+3. Use `scripts/generate_review_plan.py <dir>` when script execution is available.
+4. Output today's review questions and the next review date.
+
 ## Five-Question Framework
 
 For every knowledge point, organize learning around:
@@ -98,6 +156,7 @@ When the user asks to continue learning:
 3. Explain why this task is next.
 4. Include learning goal, material, short teacher-style explanation, self-test questions, and pass criteria.
 5. If material is too thin, diagnose and recommend expansion first.
+6. Treat bare `继续` as a full state-machine command, not as a request to restart the course.
 
 Use this output shape:
 
@@ -217,7 +276,9 @@ If script execution is available, run `scripts/generate_review_plan.py <learning
 
 ## Example Invocations
 
-- `继续学习。请根据 _学习状态.md 给我今天 40 分钟内能完成的学习任务。`
-- `我学完了，开始考我。一次只问一个问题，严格批改。`
-- `结束本次学习。请输出需要更新到 Obsidian 的 _学习状态.md、错题本.md、复习卡片.md 和下次学习计划。`
+- `$universal-learning-coach 初始化`
+- `$universal-learning-coach 继续`
+- `$universal-learning-coach 学完了`
+- `$universal-learning-coach 结束`
+- `$universal-learning-coach 复习`
 - `当前学习资料中只简单提到了 Android vendor 分区，请判断这部分资料是否足够学习。如果不足，请给出资料缺口诊断，并扩展成系统学习笔记。`

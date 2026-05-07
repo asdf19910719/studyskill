@@ -78,6 +78,38 @@ ObsidianVault/
 
 ## 常用调用语句
 
+推荐使用短命令。第一次进入学习项目时：
+
+```text
+$universal-learning-coach 初始化
+```
+
+以后每次回到同一个学习项目，直接输入：
+
+```text
+$universal-learning-coach 继续
+```
+
+学完当天任务后：
+
+```text
+$universal-learning-coach 学完了
+```
+
+完成考试和批改后：
+
+```text
+$universal-learning-coach 结束
+```
+
+需要单独复习时：
+
+```text
+$universal-learning-coach 复习
+```
+
+这些短命令会读取 `_学习状态.md`、`错题本.md` 和 `复习卡片.md`，根据上次保存的进度决定下一步，不需要每次重复长提示词。
+
 ```text
 继续学习。请根据 _学习状态.md 给我今天 40 分钟内能完成的学习任务。
 ```
@@ -132,6 +164,33 @@ universal-learning-coach/
 
 v1 是纯 Skill 指令、模板和规则文件，适合 Codex 与 Claude Code 直接使用。v2 增加 Python 脚本，用于自动创建学习文件、追加学习日志、生成复习计划、扫描资料缺口和创建扩展笔记模板。
 
+## 自动流程说明
+
+这个 skill 不是后台常驻服务，仍需要通过 `$universal-learning-coach <短命令>` 触发。但触发后不需要重新说明完整流程。它会按 `_学习状态.md` 中的状态字段继续：
+
+```text
+初始化
+→ 资料诊断
+→ 必要时扩展笔记
+→ 继续学习
+→ 学完后考试
+→ 结束更新
+→ 生成复习计划
+→ 下次继续
+```
+
+`_学习状态.md` 中关键字段：
+
+```markdown
+## 当前流程状态
+学习中
+
+## 下一步动作
+继续学习
+```
+
+`继续` 会优先读取这些字段。如果 `下一步动作` 是 `扩展笔记`，则先诊断和扩展；如果是 `开始考试`，则直接出题；如果是 `生成复习计划`，则先复习；否则生成当天 30-60 分钟学习任务。
+
 ## v2 脚本
 
 ```bash
@@ -153,11 +212,11 @@ python scripts/test_learning_scripts.py
 ## 验收测试 Prompt
 
 ```text
-使用 universal-learning-coach skill。当前目录有一份 Android 远场音频中间件学习笔记，请初始化学习系统。
+$universal-learning-coach 初始化
 ```
 
 ```text
-使用 universal-learning-coach skill。请根据 _学习状态.md 给我今天 40 分钟内能完成的学习任务。
+$universal-learning-coach 继续
 ```
 
 ```text
@@ -173,11 +232,11 @@ python scripts/test_learning_scripts.py
 ```
 
 ```text
-我学完了，开始考我。一次只问一个问题。
+$universal-learning-coach 学完了
 ```
 
 ```text
-结束本次学习。请输出 Obsidian 更新内容。
+$universal-learning-coach 结束
 ```
 
 ```text

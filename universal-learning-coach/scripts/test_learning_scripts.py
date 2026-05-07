@@ -43,6 +43,17 @@ class LearningScriptsTest(unittest.TestCase):
             self.assertIn("created", result.stdout)
             self.assertIn("exists", result.stdout)
 
+    def test_init_learning_files_state_template_contains_flow_fields(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+
+            result = run_script("init_learning_files.py", work)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            content = (work / "_学习状态.md").read_text(encoding="utf-8")
+            self.assertIn("## 当前流程状态", content)
+            self.assertIn("## 下一步动作", content)
+
     def test_append_learning_log_appends_date_heading_and_input_file(self):
         with tempfile.TemporaryDirectory() as tmp:
             work = Path(tmp)
