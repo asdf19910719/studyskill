@@ -87,22 +87,23 @@ When the user says `复习`:
 3. Use `scripts/generate_review_plan.py <dir>` when script execution is available.
 4. Output today's review questions and the next review date.
 
-## Five-Question Framework
+## Six-Question Framework
 
 For every knowledge point, organize learning around:
 
-1. What problem does it solve?
-2. What is the core idea?
-3. What are its limits and boundaries?
-4. How is it used in real scenarios?
-5. How can the learner prove they understand it?
+1. What is this concept?
+2. What problem does it solve?
+3. What is the core idea?
+4. What are its limits and boundaries?
+5. How is it used in real scenarios?
+6. How can the learner prove they understand it?
 
 For technical topics, also answer:
 
-6. How should problems be debugged?
-7. How is it different from adjacent technologies?
+7. How should problems be debugged?
+8. How is it different from adjacent technologies?
 
-Read `references/五问学习法.md` when the user asks for a full learning note, course structure, or deep explanation.
+Read `references/六问学习法.md` when the user asks for a full learning note, course structure, or deep explanation.
 
 ## Material Diagnosis
 

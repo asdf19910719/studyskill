@@ -20,6 +20,10 @@ EXCLUDED_DIRS = {".git", ".agents", ".claude", ".codex", "__pycache__"}
 def is_material(path):
     if path.name in EXCLUDED_NAMES:
         return False
+    if re.match(r"^\d{4}-\d{2}-\d{2}_今日学习任务\.md$", path.name):
+        return False
+    if re.match(r"^\d{4}-\d{2}-\d{2}_今日复习计划\.md$", path.name):
+        return False
     if path.suffix.lower() not in MATERIAL_SUFFIXES:
         return False
     return not any(part in EXCLUDED_DIRS for part in path.parts)

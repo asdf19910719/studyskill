@@ -121,9 +121,10 @@ def render_lesson(state, minutes, lesson_date):
             "",
             "## 学习目标",
             "学完后你应该能：",
-            "1. 用自己的话说明 `" + topic + "` 解决的问题。",
-            "2. 解释 `" + goal + "`。",
-            "3. 针对未掌握点给出可验证回答。",
+            "1. 用自己的话说明 `" + topic + "` 是什么。",
+            "2. 说明 `" + topic + "` 解决的问题。",
+            "3. 解释 `" + goal + "`。",
+            "4. 针对未掌握点给出可验证回答。",
             "",
             "## 需要阅读的材料",
             render_bullets(materials),
@@ -135,9 +136,10 @@ def render_lesson(state, minutes, lesson_date):
             "请使用 `$universal-learning-coach 继续` 围绕今日主题进行老师式讲解：先讲问题背景，再讲核心机制、边界、工程场景和常见误区。",
             "",
             "## 自测题",
-            "1. `" + topic + "` 主要解决什么问题？",
-            "2. `" + goal + "` 中最容易混淆的边界是什么？",
-            "3. 结合一个真实场景，说明你会如何判断自己已经理解。",
+            "1. `" + topic + "` 是什么？",
+            "2. `" + topic + "` 主要解决什么问题？",
+            "3. `" + goal + "` 中最容易混淆的边界是什么？",
+            "4. 结合一个真实场景，说明你会如何判断自己已经理解。",
             "",
             "## 通过标准",
             "- 能在 3 分钟内讲清楚今日主题的问题背景和核心机制。",
@@ -161,14 +163,20 @@ def main():
     parser.add_argument("--minutes", type=int, default=40, help="Expected lesson duration")
     parser.add_argument("--date", default=date.today().isoformat(), help="Lesson date as YYYY-MM-DD")
     parser.add_argument("--output", default="今日学习任务.md", help="Output Markdown filename")
+    parser.add_argument("--no-archive", action="store_true", help="Only write the latest output file, without a date-stamped archive")
     args = parser.parse_args()
 
     base = Path(args.directory)
     base.mkdir(parents=True, exist_ok=True)
     state = load_state(base)
+    content = render_lesson(state, args.minutes, args.date)
     output_path = base / args.output
-    output_path.write_text(render_lesson(state, args.minutes, args.date), encoding="utf-8")
+    output_path.write_text(content, encoding="utf-8")
     print("created: " + str(output_path))
+    if not args.no_archive:
+        archive_path = base / (args.date + "_" + args.output)
+        archive_path.write_text(content, encoding="utf-8")
+        print("created: " + str(archive_path))
 
 
 if __name__ == "__main__":

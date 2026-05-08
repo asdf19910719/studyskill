@@ -144,7 +144,7 @@ universal-learning-coach/
 │   ├── 外部资料清单模板.md
 │   └── learning_state.json
 ├── references/
-│   ├── 五问学习法.md
+│   ├── 六问学习法.md
 │   ├── 学习流程说明.md
 │   ├── 状态机规则.md
 │   ├── 资料缺口诊断规则.md
@@ -228,7 +228,7 @@ python scripts/test_learning_scripts.py
 
 `finish_session.py` 适合在 `$universal-learning-coach 结束` 时由 AI 调用，用于自动追加 `_学习状态.md`、`错题本.md`、`复习卡片.md`，并同步更新 `learning_state.json`。
 `index_materials.py` 会扫描当前学习目录中的 `.md` / `.txt` 学习材料，生成 `学习材料索引.md`，并更新 `learning_state.json.materials`；`init_learning_files.py` 会自动调用它。
-`start_lesson.py` 适合在 `$universal-learning-coach 继续` 路由到普通学习时调用，用于根据 `learning_state.json` 或 `_学习状态.md` 自动生成 `今日学习任务.md`。
+`start_lesson.py` 适合在 `$universal-learning-coach 继续` 路由到普通学习时调用，用于根据 `learning_state.json` 或 `_学习状态.md` 自动生成 `今日学习任务.md`，并默认额外生成 `YYYY-MM-DD_今日学习任务.md` 作为当天归档。
 `doctor.py` 适合进入学习项目后先运行，用于检查状态文件是否完整、是否有到期复习、下一步应该调用哪个短命令。
 
 ## 注意事项

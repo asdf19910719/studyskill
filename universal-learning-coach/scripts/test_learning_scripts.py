@@ -311,14 +311,18 @@ class LearningScriptsTest(unittest.TestCase):
 
             self.assertEqual(result.returncode, 0, result.stderr)
             task_path = work / "今日学习任务.md"
+            archive_path = work / "2026-05-07_今日学习任务.md"
             self.assertTrue(task_path.exists())
+            self.assertTrue(archive_path.exists())
             content = task_path.read_text(encoding="utf-8")
+            archive_content = archive_path.read_text(encoding="utf-8")
             self.assertIn("# 今日学习任务", content)
             self.assertIn("Android vendor 分区", content)
             self.assertIn("40 分钟", content)
             self.assertIn("VNDK 作用", content)
             self.assertIn("vendor/product 区别", content)
             self.assertIn("## 通过标准", content)
+            self.assertEqual(content, archive_content)
 
     def test_index_materials_writes_index_and_updates_state(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -327,6 +331,7 @@ class LearningScriptsTest(unittest.TestCase):
             (work / "notes" / "Android_vendor架构.md").write_text("# Android vendor 架构\nTreble 和 VNDK\n", encoding="utf-8")
             (work / "学习材料.txt").write_text("binder 音频链路\n", encoding="utf-8")
             (work / "今日学习任务.md").write_text("# generated\n", encoding="utf-8")
+            (work / "2026-05-07_今日学习任务.md").write_text("# generated archive\n", encoding="utf-8")
             (work / "learning_state.json").write_text(
                 json.dumps({"materials": [], "current_topic": ""}, ensure_ascii=False),
                 encoding="utf-8",
@@ -341,6 +346,7 @@ class LearningScriptsTest(unittest.TestCase):
             self.assertIn("notes/Android_vendor架构.md", index_content)
             self.assertIn("学习材料.txt", index_content)
             self.assertNotIn("今日学习任务.md", index_content)
+            self.assertNotIn("2026-05-07_今日学习任务.md", index_content)
             state = json.loads((work / "learning_state.json").read_text(encoding="utf-8"))
             self.assertIn("notes/Android_vendor架构.md", state["materials"])
             self.assertIn("学习材料.txt", state["materials"])
