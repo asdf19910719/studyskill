@@ -82,6 +82,34 @@ class LearningScriptsTest(unittest.TestCase):
             self.assertIn("Android_vendor架构.md", state["materials"])
             self.assertNotIn("错题本.md", state["materials"])
 
+    def test_init_learning_files_builds_knowledge_map(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            (work / "Android远场音频中间件学习笔记.md").write_text(
+                "\n".join(
+                    [
+                        "# Android 远场音频中间件学习笔记",
+                        "- Android vendor 分区承载厂商实现。",
+                        "- Treble 降低 framework 与 vendor 的耦合。",
+                        "- VNDK 约束 vendor 侧可使用的系统库。",
+                        "- 控制面适合 LocalSocket，数据面适合共享内存、mmap 和 futex。",
+                        "- SELinux 会影响跨进程访问。",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+
+            result = run_script("init_learning_files.py", work)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertTrue((work / "知识地图.md").exists())
+            state = json.loads((work / "learning_state.json").read_text(encoding="utf-8"))
+            concept_names = [item["name"] for item in state["concepts"]]
+            self.assertIn("vendor 分区", concept_names)
+            self.assertIn("Treble", concept_names)
+            self.assertIn("VNDK", concept_names)
+            self.assertEqual(state["next_action"], "概念预热")
+
     def test_studyctl_next_prefers_learning_state_json(self):
         with tempfile.TemporaryDirectory() as tmp:
             work = Path(tmp)
@@ -102,6 +130,29 @@ class LearningScriptsTest(unittest.TestCase):
             self.assertEqual(result.returncode, 0, result.stderr)
             self.assertIn("下一步动作：扩展笔记", result.stdout)
             self.assertIn("$universal-learning-coach 继续", result.stdout)
+
+    def test_studyctl_next_routes_concept_warmup(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            (work / "learning_state.json").write_text(
+                json.dumps(
+                    {
+                        "flow_status": "概念盘点完成",
+                        "next_action": "概念预热",
+                        "current_topic": "Android 远场音频",
+                        "current_concept": "vendor 分区",
+                    },
+                    ensure_ascii=False,
+                ),
+                encoding="utf-8",
+            )
+
+            result = run_script("studyctl.py", "next", work)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            self.assertIn("下一步动作：概念预热", result.stdout)
+            self.assertIn("$universal-learning-coach 继续", result.stdout)
+            self.assertIn("先用六问法", result.stdout)
 
     def test_studyctl_next_falls_back_to_markdown_state(self):
         with tempfile.TemporaryDirectory() as tmp:
@@ -351,6 +402,42 @@ class LearningScriptsTest(unittest.TestCase):
             self.assertIn("notes/Android_vendor架构.md", state["materials"])
             self.assertIn("学习材料.txt", state["materials"])
             self.assertEqual(state["current_topic"], "Android vendor架构")
+
+    def test_build_knowledge_map_extracts_concepts_and_updates_state(self):
+        with tempfile.TemporaryDirectory() as tmp:
+            work = Path(tmp)
+            (work / "Android远场音频中间件学习笔记.md").write_text(
+                "\n".join(
+                    [
+                        "# Android 远场音频中间件学习笔记",
+                        "Android vendor 分区承载厂商实现，Treble 降低 framework 与 vendor 耦合。",
+                        "VNDK 约束 vendor 侧可用系统库。",
+                        "控制面适合 LocalSocket，数据面适合共享内存、mmap 和 futex。",
+                        "SELinux 会影响跨进程和跨分区访问。",
+                    ]
+                ),
+                encoding="utf-8",
+            )
+            (work / "learning_state.json").write_text(
+                json.dumps({"materials": ["Android远场音频中间件学习笔记.md"], "current_topic": "Android 远场音频"}, ensure_ascii=False),
+                encoding="utf-8",
+            )
+
+            result = run_script("build_knowledge_map.py", work)
+
+            self.assertEqual(result.returncode, 0, result.stderr)
+            map_path = work / "知识地图.md"
+            self.assertTrue(map_path.exists())
+            content = map_path.read_text(encoding="utf-8")
+            self.assertIn("# 知识地图", content)
+            self.assertIn("| 概念 | 类型 | 资料深度 | 熟悉度 | 是否先修 | 下一步 |", content)
+            self.assertIn("vendor 分区", content)
+            self.assertIn("Treble", content)
+            self.assertIn("LocalSocket", content)
+            state = json.loads((work / "learning_state.json").read_text(encoding="utf-8"))
+            self.assertEqual(state["current_concept"], "Android 分区")
+            self.assertEqual(state["next_action"], "概念预热")
+            self.assertIn("concepts", state)
 
 
 if __name__ == "__main__":

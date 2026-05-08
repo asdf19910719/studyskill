@@ -3,6 +3,7 @@ import shutil
 from pathlib import Path
 import json
 import index_materials
+import build_knowledge_map
 
 
 ROOT = Path(__file__).resolve().parents[1]
@@ -35,6 +36,8 @@ def init_learning_files(target_dir):
 
     materials = index_materials.index_materials(target)
     results.append("indexed materials: " + str(len(materials)))
+    concepts = build_knowledge_map.build_knowledge_map(target)
+    results.append("mapped concepts: " + str(len(concepts)))
     return results
 
 

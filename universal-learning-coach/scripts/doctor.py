@@ -16,6 +16,7 @@ REQUIRED_FILES = [
 ACTION_COMMANDS = {
     "初始化": "$universal-learning-coach 初始化",
     "诊断资料": "$universal-learning-coach 继续",
+    "概念预热": "$universal-learning-coach 继续",
     "扩展笔记": "$universal-learning-coach 继续",
     "继续学习": "$universal-learning-coach 继续",
     "开始考试": "$universal-learning-coach 学完了",

@@ -16,6 +16,7 @@ DEFAULT_STATE = {
 ACTION_COMMANDS = {
     "初始化": "$universal-learning-coach 初始化",
     "诊断资料": "$universal-learning-coach 继续",
+    "概念预热": "$universal-learning-coach 继续",
     "扩展笔记": "$universal-learning-coach 继续",
     "继续学习": "$universal-learning-coach 继续",
     "开始考试": "$universal-learning-coach 学完了",
@@ -114,6 +115,8 @@ def build_reason(state):
     action = state["next_action"]
     if action == "扩展笔记":
         return "当前资料不足或状态要求先补齐系统学习笔记。"
+    if action == "概念预热":
+        return "知识地图显示当前概念是陌生先修概念，应先用六问法做短讲解和最小自测。"
     if action == "开始考试":
         return "当前学习任务已完成，下一步应通过单题考试检验掌握情况。"
     if action == "结束更新":
